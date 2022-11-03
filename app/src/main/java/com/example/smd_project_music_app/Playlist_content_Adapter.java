@@ -3,6 +3,8 @@ package com.example.smd_project_music_app;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -10,9 +12,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
-public class Playlist_content_Adapter  extends RecyclerView.Adapter<Playlist_content_Adapter.PlaylistContentViewHolder> {
-    private ArrayList<Songs> mDataset;
+public class Playlist_content_Adapter  extends RecyclerView.Adapter<Playlist_content_Adapter.PlaylistContentViewHolder> implements Filterable {
+    private ArrayList<Songs> songs;
+    private ArrayList<Songs> filteredSongs;
+    private Filter filter;
 
     @Override
     public PlaylistContentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -25,9 +30,9 @@ public class Playlist_content_Adapter  extends RecyclerView.Adapter<Playlist_con
 
     @Override
     public void onBindViewHolder(@NonNull PlaylistContentViewHolder holder, int position) {
-        String SongName = mDataset.get(position).getName();
-        int SongImg = mDataset.get(position).getImg();
-        String SongSinger = mDataset.get(position).getSinger();
+        String SongName = filteredSongs.get(position).getTitle();
+        int SongImg = filteredSongs.get(position).getImg();
+        String SongSinger = filteredSongs.get(position).getArtist();
         holder.Sname.setText(SongName);
         holder.Ssinger.setText(SongSinger);
         holder.Simage.setImageResource(SongImg);
@@ -36,11 +41,12 @@ public class Playlist_content_Adapter  extends RecyclerView.Adapter<Playlist_con
 
     @Override
     public int getItemCount() {
-        return mDataset.size();
+        return filteredSongs.size();
     }
 
     public Playlist_content_Adapter(ArrayList<Songs> ds){
-        mDataset = ds;
+        songs = ds;
+        filteredSongs = ds;
     }
 
     //=====================================================================================
@@ -58,5 +64,45 @@ public class Playlist_content_Adapter  extends RecyclerView.Adapter<Playlist_con
         }
     }
     //=====================================================================================
+    @Override
+    public Filter getFilter() {
+        if (filter == null){
+            filter = new ProductFilter();
+        }
+        return filter;
+    }
 
+    private class ProductFilter extends Filter {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            FilterResults filterResults = new FilterResults();
+
+            if (constraint != null && constraint.length() > 0){
+                ArrayList<Songs> filteredList = new ArrayList<Songs>();
+                for (int i = 0; i < songs.size(); i++){
+                    if (songs.get(i).getTitle().toLowerCase(Locale.ROOT).contains(constraint) ||
+                            songs.get(i).getTitle().contains(constraint)
+                    ){
+                        filteredList.add(songs.get(i));
+                    }
+                }
+
+                filterResults.count = filteredList.size();
+                filterResults.values = filteredList;
+            }
+
+            else {
+                filterResults.count = songs.size();
+                filterResults.values = songs;
+            }
+
+            return filterResults;
+        }
+
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+            filteredSongs = (ArrayList<Songs>) filterResults.values;
+            notifyDataSetChanged();
+        }
+    }
 }

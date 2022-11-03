@@ -1,24 +1,29 @@
 package com.example.smd_project_music_app;
 
-import android.widget.ImageView;
-
 public class Songs {
     private int img;
-    private String name;
-    private String singer;
+    private String title;
+    private String artist;
+    private String path;
 
     public Songs(int i, String n, String s){
         img = i;
-        name = n;
-        singer = s;
+        title = n;
+        artist = s;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public Songs(String n, String s, String p){
+        title = n;
+        artist = s;
+        path = p;
     }
 
-    public String getName() {
-        return name;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public void setImg(int img) {
@@ -29,11 +34,11 @@ public class Songs {
         return img;
     }
 
-    public void setSinger(String singer) {
-        this.singer = singer;
+    public void setArtist(String artist) {
+        this.artist = artist;
     }
 
-    public String getSinger() {
-        return singer;
+    public String getArtist() {
+        return artist;
     }
 }
