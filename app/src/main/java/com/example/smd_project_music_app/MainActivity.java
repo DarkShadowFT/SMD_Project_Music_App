@@ -1,5 +1,9 @@
 package com.example.smd_project_music_app;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -11,10 +15,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -29,12 +35,12 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Playlist_content_Adapter.OnMusicClick {
 
 		ArrayList<Songs> dataset = new ArrayList<Songs>();
 		private RecyclerView recyclerView;
 		private RecyclerView.LayoutManager layoutManager;
-		private Playlist_content_Adapter mAdapter = new Playlist_content_Adapter(dataset);
+		private Playlist_content_Adapter mAdapter = new Playlist_content_Adapter(dataset, this);
 		private EditText search;
 		private TextView noOfSongs;
 		private Filterable filterable;
@@ -42,6 +48,11 @@ public class MainActivity extends AppCompatActivity {
 
 		private DrawerLayout mDrawerLayout;
 		private final int MY_PERMISSION_REQUEST = 100;
+
+		/////
+		ActivityResultLauncher<Intent> MusicPlayerLauncher;
+
+		////
 
 		@Override
 		protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +98,25 @@ public class MainActivity extends AppCompatActivity {
 				dataset.add(obj2);
 				noOfSongs.setText(Integer.toString(dataset.size()));
 				mAdapter.notifyDataSetChanged();
+
+				/**launcher**/
+				MusicPlayerLauncher=registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+					@Override
+					public void onActivityResult(ActivityResult result) {
+						if(result.getResultCode()==RESULT_OK)
+						{
+							Intent intent4=result.getData();
+						}
+
+					}
+				});
+
+
+
+
+
+
+
 		}
 
 		/**
@@ -163,4 +193,24 @@ public class MainActivity extends AppCompatActivity {
 					songCursor.close();
 				}
 		}
+
+	@Override
+	public void onItemClick(Songs p) {
+		Intent intent = new Intent(this , MusicPlayer.class);
+
+		intent.putExtra("MySongs",dataset);
+
+		//set flag or it will give error
+		//intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+		MusicPlayerLauncher.launch(intent);
+	}
+
+
+	///
+
+
+
+
+
 }

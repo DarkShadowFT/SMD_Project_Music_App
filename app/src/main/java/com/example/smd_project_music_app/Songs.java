@@ -1,6 +1,8 @@
 package com.example.smd_project_music_app;
 
-public class Songs {
+import java.io.Serializable;
+
+public class Songs implements Serializable {
     private int img;
     private String title;
     private String artist;
@@ -40,5 +42,9 @@ public class Songs {
 
     public String getArtist() {
         return artist;
+    }
+
+    public String getPath() {
+        return this.path;
     }
 }

@@ -19,6 +19,8 @@ public class Playlist_content_Adapter  extends RecyclerView.Adapter<Playlist_con
     private ArrayList<Songs> filteredSongs;
     private Filter filter;
 
+    private OnMusicClick SongClickListener;
+
     @Override
     public PlaylistContentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
@@ -44,9 +46,15 @@ public class Playlist_content_Adapter  extends RecyclerView.Adapter<Playlist_con
         return filteredSongs.size();
     }
 
-    public Playlist_content_Adapter(ArrayList<Songs> ds){
+    public Playlist_content_Adapter(ArrayList<Songs> ds, OnMusicClick ClickListener){
         songs = ds;
         filteredSongs = ds;
+        this.SongClickListener=ClickListener;
+    }
+
+    public interface OnMusicClick{
+        //void onItemClick(int position);
+        void onItemClick(Songs p);
     }
 
     //=====================================================================================
@@ -61,6 +69,15 @@ public class Playlist_content_Adapter  extends RecyclerView.Adapter<Playlist_con
             Sname = (TextView) v.findViewById(R.id.Song_name);
             Ssinger = (TextView) v.findViewById(R.id.Singer_name);
             Simage = (ImageView) v.findViewById(R.id.img);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int pos = (int) v.getTag();
+                    HelperMusicPlayer.getInstance().reset();
+                    HelperMusicPlayer.index=pos;
+                    SongClickListener.onItemClick(filteredSongs.get(pos));
+                }
+            });
         }
     }
     //=====================================================================================
