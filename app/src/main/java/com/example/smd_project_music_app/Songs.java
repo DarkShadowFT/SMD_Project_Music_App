@@ -7,17 +7,20 @@ public class Songs implements Serializable {
     private String title;
     private String artist;
     private String path;
+    private int duration;
 
-    public Songs(int i, String n, String s){
+    public Songs(int i, String t, String a, int d){
         img = i;
-        title = n;
-        artist = s;
+        title = t;
+        artist = a;
+        duration = d;
     }
 
-    public Songs(String n, String s, String p){
-        title = n;
-        artist = s;
+    public Songs(String t, String a, String p, int d){
+        title = t;
+        artist = a;
         path = p;
+        duration = d;
     }
 
     public void setTitle(String title) {
@@ -46,5 +49,13 @@ public class Songs implements Serializable {
 
     public String getPath() {
         return this.path;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 }

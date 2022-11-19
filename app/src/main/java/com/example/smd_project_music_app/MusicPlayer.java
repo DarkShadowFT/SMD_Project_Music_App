@@ -94,7 +94,7 @@ public class MusicPlayer extends AppCompatActivity {
         MyMediaPlayer.reset();
         try {
             MyMediaPlayer.setDataSource(MyCurrSong.getPath());
-            MyMediaPlayer.prepare();
+            MyMediaPlayer.prepareAsync();
             MyMediaPlayer.start();
             ProgressBar.setProgress(0);
             ProgressBar.setMax(MyMediaPlayer.getDuration());

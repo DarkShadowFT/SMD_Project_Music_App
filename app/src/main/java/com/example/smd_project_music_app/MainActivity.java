@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -24,6 +26,7 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -33,7 +36,14 @@ import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 public class MainActivity extends AppCompatActivity implements Playlist_content_Adapter.OnMusicClick {
 
@@ -49,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements Playlist_content_
 		private DrawerLayout mDrawerLayout;
 		private final int MY_PERMISSION_REQUEST = 100;
 
-		/////
 		ActivityResultLauncher<Intent> MusicPlayerLauncher;
 
 		////
@@ -92,31 +101,23 @@ public class MainActivity extends AppCompatActivity implements Playlist_content_
 				filterable = mAdapter;
 				recyclerView.setAdapter(mAdapter);
 
-				Songs obj1 = new Songs(R.drawable.my_book, "ButterCup", "Jack Staubr");
-				Songs obj2 = new Songs(R.drawable.my_pencil, "Alone", "Alan Walker");
-				dataset.add(obj1);
-				dataset.add(obj2);
-				noOfSongs.setText(Integer.toString(dataset.size()));
-				mAdapter.notifyDataSetChanged();
 
 				/**launcher**/
-				MusicPlayerLauncher=registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
-					@Override
-					public void onActivityResult(ActivityResult result) {
-						if(result.getResultCode()==RESULT_OK)
-						{
-							Intent intent4=result.getData();
+				MusicPlayerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+						@Override
+						public void onActivityResult(ActivityResult result) {
+								if (result.getResultCode() == RESULT_OK) {
+										Intent intent4 = result.getData();
+								}
+
 						}
-
-					}
 				});
-
-
-
-
-
-
-
+				exportToM3U("playlist.m3u");
+				dataset.clear();
+				mAdapter.notifyDataSetChanged();;
+				importPlaylist("playlist.m3u");
+				noOfSongs.setText(Integer.toString(dataset.size()));
+				mAdapter.notifyDataSetChanged();
 		}
 
 		/**
@@ -175,7 +176,6 @@ public class MainActivity extends AppCompatActivity implements Playlist_content_
 		 */
 		public void setContent() {
 				getMusic();
-				System.out.println();
 		}
 
 		public void getMusic() {
@@ -185,32 +185,87 @@ public class MainActivity extends AppCompatActivity implements Playlist_content_
 						int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
 						int songArtist = songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
 						int songPath = songCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+						int songDuration = songCursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
 
 						do {
-								dataset.add(new Songs(songCursor.getString(songTitle), songCursor.getString(songArtist), songCursor.getString(songPath)));
+								if (songCursor.getString(songPath).contains("/storage/emulated/0/Songs")){
+										dataset.add(new Songs(songCursor.getString(songTitle),
+														songCursor.getString(songArtist), songCursor.getString(songPath),
+														songCursor.getInt(songDuration)));
+								}
 						}
 						while (songCursor.moveToNext());
-					songCursor.close();
+						songCursor.close();
 				}
 		}
 
-	@Override
-	public void onItemClick(Songs p) {
-		Intent intent = new Intent(this , MusicPlayer.class);
+		@Override
+		public void onItemClick(Songs p) {
+				Intent intent = new Intent(this, MusicPlayer.class);
 
-		intent.putExtra("MySongs",dataset);
+				intent.putExtra("MySongs", dataset);
 
-		//set flag or it will give error
-		//intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				//set flag or it will give error
+				//intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-		MusicPlayerLauncher.launch(intent);
-	}
+				MusicPlayerLauncher.launch(intent);
+		}
 
+		public void exportToM3U(String playlistName) {
+				try {
+						File file = new File(getFilesDir(), playlistName);
+						if (dataset.size() > 0 && file.exists())
+								file.delete();
+						BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+						writer.append("#EXTM3U");
+						writer.newLine();
+						String output;
+						for (int i = 0; i < dataset.size(); i++) {
+								output = "#EXTINF:" + dataset.get(i).getDuration() + "," +
+												dataset.get(i).getArtist() + " – " + dataset.get(i).getTitle();
+								writer.append(output);
+								writer.newLine();
+								writer.append(dataset.get(i).getPath());
+								writer.newLine();
+						}
+						writer.close();
+				} catch (Exception ex) {
+						ex.printStackTrace();
+				}
+		}
 
-	///
-
-
-
-
-
+		public void importPlaylist(String playlistName){
+				File playlistFile = new File(getFilesDir(), playlistName);
+				try {
+						String line;
+						BufferedReader reader = new BufferedReader(new FileReader(playlistFile));
+						line = reader.readLine();
+						if (line.equals("#EXTM3U")){
+								String artist;
+								String title;
+								String path;
+								int duration;
+								while ((line = reader.readLine()) != null){
+										String components[] = line.split(" – ", 2);
+										if (components.length > 1){
+												title = components[1];
+										}
+										else {
+												title = "unknown";
+										}
+										duration = Integer.parseInt(components[0].split(":")[1].split(",")[0]);
+										artist = components[0].split(":")[1].split(",")[1];
+										line = reader.readLine();
+										path = line;
+										dataset.add(new Songs(title, artist, path, duration));
+								}
+						}
+						else {
+								Log.e("ERROR", "The file is unsupported!");
+						}
+				}
+				catch (Exception ex){
+						ex.printStackTrace();
+				}
+		}
 }
