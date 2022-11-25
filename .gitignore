@@ -19,3 +19,5 @@ local.properties
 .idea/gradle.xml
 .idea/compiler.xml
 .idea/shelf/Uncommitted_changes_before_Update_at_10_29_2022_5_37_PM__Changes_.xml
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
