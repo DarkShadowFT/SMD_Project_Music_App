@@ -22,6 +22,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
 		private EditText emailTextView, passwordTextView;
 		private Button Btn;
+		private Button Btn_lgn;
 		private ProgressBar progressBar;
 		private FirebaseAuth mAuth;
 
@@ -36,9 +37,9 @@ public class RegistrationActivity extends AppCompatActivity {
 
 				// initialising all views through id defined above
 				emailTextView = findViewById(R.id.email);
-				passwordTextView = findViewById(R.id.passwd);
-				Btn = findViewById(R.id.btnregister);
-				progressBar = findViewById(R.id.progressbar);
+				passwordTextView = findViewById(R.id.pwd);
+				Btn = findViewById(R.id.register);
+				progressBar = findViewById(R.id.progressBar);
 
 				// Set on Click Listener on Registration button
 				Btn.setOnClickListener(new View.OnClickListener() {
@@ -48,6 +49,18 @@ public class RegistrationActivity extends AppCompatActivity {
 								registerNewUser();
 						}
 				});
+			Btn_lgn = findViewById(R.id.login);
+			Btn_lgn.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v)
+				{
+					login();
+				}
+			});
+		}
+
+		void login(){
+			finish();
 		}
 
 		private void registerNewUser()

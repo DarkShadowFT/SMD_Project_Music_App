@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SMD_Project_Music_App</string>
+    <string name="remember_me">Remember Me</string>
 </resources>

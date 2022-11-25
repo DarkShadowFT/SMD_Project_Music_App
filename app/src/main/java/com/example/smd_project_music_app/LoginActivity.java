@@ -10,6 +10,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Button;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,7 +26,9 @@ public class LoginActivity extends AppCompatActivity {
 
 		private EditText emailTextView, passwordTextView;
 		private Button Btn;
+		private Button Btn2;
 		private ProgressBar progressbar;
+	private ActivityResultLauncher<Intent> RegistrationLauncher;
 
 		private FirebaseAuth mAuth;
 		@Override
@@ -35,7 +41,7 @@ public class LoginActivity extends AppCompatActivity {
 
 				// initialising all views through id defined above
 				emailTextView = findViewById(R.id.email);
-				passwordTextView = findViewById(R.id.password);
+				passwordTextView = findViewById(R.id.pwd);
 				Btn = findViewById(R.id.login);
 				progressbar = findViewById(R.id.progressBar);
 
@@ -47,8 +53,32 @@ public class LoginActivity extends AppCompatActivity {
 								loginUserAccount();
 						}
 				});
+
+			Btn2 = findViewById(R.id.register);
+
+			// Set on Click Listener on Sign-in button
+			Btn2.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v)
+				{
+					register();
+				}
+			});
+
+			RegistrationLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+					new ActivityResultCallback<ActivityResult>() {
+
+						@Override
+						public void onActivityResult(ActivityResult result) {
+
+						}
+					});
 		}
 
+		void register(){
+			Intent intent = new Intent(this, RegistrationActivity.class);
+			RegistrationLauncher.launch(intent);
+		}
 		private void loginUserAccount()
 		{
 
