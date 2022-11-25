@@ -92,10 +92,10 @@ public class MainActivity extends AppCompatActivity implements Playlist_content_
 				filterable = mAdapter;
 				recyclerView.setAdapter(mAdapter);
 
-				Songs obj1 = new Songs(R.drawable.my_book, "ButterCup", "Jack Staubr");
-				Songs obj2 = new Songs(R.drawable.my_pencil, "Alone", "Alan Walker");
-				dataset.add(obj1);
-				dataset.add(obj2);
+//				Songs obj1 = new Songs(R.drawable.my_book, "ButterCup", "Jack Staubr");
+//				Songs obj2 = new Songs(R.drawable.my_pencil, "Alone", "Alan Walker");
+//				dataset.add(obj1);
+//				dataset.add(obj2);
 				noOfSongs.setText(Integer.toString(dataset.size()));
 				mAdapter.notifyDataSetChanged();
 

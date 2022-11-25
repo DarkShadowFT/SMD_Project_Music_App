@@ -57,14 +57,7 @@ public class MusicPlayer extends AppCompatActivity {
 
         Intent intent = getIntent();
         MySongsDataset=(ArrayList<Songs>) intent.getSerializableExtra("MySongs");
-        currSong=HelperMusicPlayer.index;
-
-
-        //set curr song
-        MyCurrSong=MySongsDataset.get(currSong);
-        SongName.setText(MyCurrSong.getTitle());
-        Singer.setText(MyCurrSong.getArtist());
-        PlayMusic();
+        SetASong();
 
         PlayBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,6 +65,19 @@ public class MusicPlayer extends AppCompatActivity {
                 PauseMusic();
             }
         });
+
+        NextSong.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { PlayNextSong();
+            }
+        });
+
+        PreviousSong.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { PlayPrevSong();
+            }
+        });
+
 
         Handler mHandler = new Handler();
 //Make sure you update Seekbar on UI thread
@@ -91,6 +97,7 @@ public class MusicPlayer extends AppCompatActivity {
 
     private void PlayMusic()
     {
+        PlayBtn.setImageResource(R.drawable.ic_baseline_pause_circle_24);
         MyMediaPlayer.reset();
         try {
             MyMediaPlayer.setDataSource(MyCurrSong.getPath());
@@ -108,11 +115,50 @@ public class MusicPlayer extends AppCompatActivity {
         if(MyMediaPlayer.isPlaying())
         {
             MyMediaPlayer.pause();
+            PlayBtn.setImageResource(R.drawable.ic_baseline_play_circle_24);
+
         }
         else
         {
             MyMediaPlayer.start();
+            PlayBtn.setImageResource(R.drawable.ic_baseline_pause_circle_24);
         }
 
     }
+    private void PlayNextSong()
+    {
+        if(HelperMusicPlayer.index<MySongsDataset.size()-1) {
+            HelperMusicPlayer.index++;
+            SetASong();
+        }
+        else if(HelperMusicPlayer.index==MySongsDataset.size()-1)
+        {
+            HelperMusicPlayer.index=-1;
+
+        }
+
+    }
+    private void PlayPrevSong()
+    {
+        if(HelperMusicPlayer.index>0) {
+            HelperMusicPlayer.index--;
+            SetASong();
+        }
+        else if(HelperMusicPlayer.index==0)
+        {
+            HelperMusicPlayer.index=MySongsDataset.size();
+
+        }
+    }
+    private void SetASong()
+    {
+        currSong=HelperMusicPlayer.index;
+        //set curr song
+        MyCurrSong=MySongsDataset.get(currSong);
+        SongName.setText(MyCurrSong.getTitle());
+        Singer.setText(MyCurrSong.getArtist());
+        PlayMusic();
+
+    }
+
 }
