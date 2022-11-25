@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+.idea/vcs.xml
+.idea/shelf/Uncommitted_changes_before_Update_at_10_29_2022_5_37_PM_\[Changes\]/shelved.patch
+.idea/misc.xml
+.idea/gradle.xml
+.idea/compiler.xml
+.idea/shelf/Uncommitted_changes_before_Update_at_10_29_2022_5_37_PM__Changes_.xml
