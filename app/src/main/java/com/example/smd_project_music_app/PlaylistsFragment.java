@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Filterable;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,7 +42,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPlaylistClick {
-
 		PlaylistsFragmentListener listener;
 		private RecyclerView recyclerView;
 		private PlaylistAdapter mAdapter;
@@ -59,16 +59,20 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 		Filterable filterable;
 
 		private TextView noOfPlaylists;
-		private ImageButton newPlaylistBtn;
+		private ImageView newPlaylistBtn;
 
-		public static Fragment getInstance(int position, ContentResolver mcontentResolver) {
-				Bundle bundle = new Bundle();
-				bundle.putInt("pos", position);
-				PlaylistsFragment tabFragment = new PlaylistsFragment();
-				tabFragment.setArguments(bundle);
-				contentResolver1 = mcontentResolver;
-				return tabFragment;
-		}
+//		private static PlaylistsFragment tabFragment;
+
+//		public static Fragment getInstance(int position, ContentResolver mcontentResolver) {
+//				Bundle bundle = new Bundle();
+//				bundle.putInt("pos", position);
+//				if (tabFragment != null)
+//						return tabFragment;
+//				tabFragment = new PlaylistsFragment();
+//				tabFragment.setArguments(bundle);
+//				contentResolver1 = mcontentResolver;
+//				return tabFragment;
+//		}
 
 		@Override
 		public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,7 +80,7 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 		}
 
 		@Override
-		public void onAttach(Context context) {
+		public void onAttach(@NonNull Context context) {
 				super.onAttach(context);
 				if (context instanceof PlaylistsFragmentListener) {
 						listener = (PlaylistsFragmentListener) context;
@@ -123,12 +127,13 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 
 				PlaylistAdapter adapter = new PlaylistAdapter(playlists, this);
 				mAdapter = adapter;
+				filterable = adapter;
 				recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
 				recyclerView.setAdapter(mAdapter);
 
 				noOfPlaylists = (TextView) view.findViewById(R.id.no_of_songs);
 
-				newPlaylistBtn = (ImageButton) view.findViewById(R.id.new_playlist_btn);
+				newPlaylistBtn = (ImageView) view.findViewById(R.id.new_playlist_btn);
 				newPlaylistBtn.setOnClickListener(new View.OnClickListener() {
 						@Override
 						public void onClick(View v) {
@@ -181,12 +186,19 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 						}
 				});
 
+
+
+//				for (int i = 0; i < playlists.size(); i++){
+//						exportToM3U(playlists.get(i).getName(), playlists.get(i));
+//				}
+
 				return view;
 		}
 
 		@Override
 		public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-				contentResolver = contentResolver1;
+				super.onViewCreated(view, savedInstanceState);
+				contentResolver = getActivity().getContentResolver();
 				setContent();
 		}
 
@@ -295,6 +307,51 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 						getPlaylists();
 						mAdapter.updateData(playlists);
 						noOfPlaylists.setText(Integer.toString(playlists.size()));
+				}
+		}
+
+		public void addSongToPlaylist(Song song){
+				if (getActivity() != null){
+						AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+						alertDialog.setTitle("Choose playlist");
+						ArrayList<String> tempPlaylistNames = new ArrayList<>();
+						for (int i = 0; i < playlists.size(); i++){
+								tempPlaylistNames.add(playlists.get(i).getName());
+						}
+						String[] items = tempPlaylistNames.toArray(new String[tempPlaylistNames.size()]);
+
+						alertDialog.setItems(items, new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+										Playlist playlist = playlists.get(which);
+										int playlistSize = playlist.getSongsList().size();
+										playlist.addSong(song);
+										if (playlist.getSongsList().size() > playlistSize)
+												exportToM3U(playlist.getName(), playlist);
+										mAdapter.notifyDataSetChanged();
+								}
+						});
+						AlertDialog alert = alertDialog.create();
+						alert.setCanceledOnTouchOutside(false);
+						alert.show();
+				}
+		}
+
+		public void deleteSongsFromPlaylist(String playlistName, ArrayList<String> songIDs){
+				for (int i = 0; i < playlists.size(); i++){
+						if (playlists.get(i) != null && playlists.get(i).getName().equals(playlistName)){
+								Playlist playlist = playlists.get(i);
+								for (int k = 0; k < songIDs.size(); k++){
+										for (Map.Entry<String, Song> entry: playlists.get(i).getSongsList().entrySet()){
+												if (entry.getValue().getId().equals(songIDs.get(k))){
+														playlist.removeSong(songIDs.get(k));
+												}
+										}
+								}
+								playlists.set(i, playlist);
+								exportToM3U(playlist.getName(), playlist);
+								mAdapter.notifyDataSetChanged();
+						}
 				}
 		}
 }

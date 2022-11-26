@@ -98,6 +98,13 @@ public class Playlist implements Serializable {
 				}
 		}
 
+		public void removeSong(String songID){
+				Song song = songsList.remove(songID);
+				if (song != null){
+						dataset.remove(song);
+				}
+		}
+
 		public void save(){
 				if (dao != null){
 						Hashtable<String,String> data = new Hashtable<String, String>();

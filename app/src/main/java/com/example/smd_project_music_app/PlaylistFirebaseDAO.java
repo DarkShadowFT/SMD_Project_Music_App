@@ -29,7 +29,8 @@ public class PlaylistFirebaseDAO {
 				observer = obs;
 				database = FirebaseDatabase.getInstance();
 				//"true" tells firebase to store your uncommitted changes to the firebase DB on your disk
-				database.setPersistenceEnabled(true);
+				if (database == null)
+						database.setPersistenceEnabled(true);
 				myRef = database.getReference("playlistData");
 
 				myRef.addValueEventListener(new ValueEventListener() {

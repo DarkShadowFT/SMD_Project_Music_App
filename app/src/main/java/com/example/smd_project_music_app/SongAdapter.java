@@ -3,8 +3,10 @@ package com.example.smd_project_music_app;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,9 +19,14 @@ import java.util.Locale;
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongContentViewHolder> implements Filterable {
     private ArrayList<Song> songs;
     private ArrayList<Song> filteredSongs;
+    private ArrayList<Integer> selectedItems = new ArrayList<>();
     private Filter filter;
 
     private onSongClick songClickListener;
+
+    private int mode = DEFAULT_MODE;
+    public static final int DEFAULT_MODE = 0;
+    public static final int SELECTABLE_MODE = 1;
 
     @Override
     public SongContentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -33,11 +40,14 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongContentVie
     @Override
     public void onBindViewHolder(@NonNull SongContentViewHolder holder, int position) {
         String SongName = filteredSongs.get(position).getTitle();
+        if (SongName.length() >= 23){
+            SongName = SongName.substring(0, 23) + "...";
+        }
         int SongImg = filteredSongs.get(position).getImg();
         String SongSinger = filteredSongs.get(position).getArtist();
         holder.Sname.setText(SongName);
         holder.Ssinger.setText(SongSinger);
-        holder.Simage.setImageResource(SongImg);
+//        holder.Simage.setImageResource(SongImg);
         holder.itemView.setTag(position);
     }
 
@@ -61,6 +71,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongContentVie
     public interface onSongClick {
         //void onItemClick(int position);
         public void onItemClick(Song song);
+        public void onAddBtnClick(Song song);
+        public void onLongItemClick(Song song);
+        public void deleteSelectedItems(ArrayList<String> songIDs);
     }
 
     //=====================================================================================
@@ -69,21 +82,65 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongContentVie
         public TextView Sname;
         public TextView Ssinger;
         public ImageView Simage;
+        public ImageButton addToPlaylist;
+        public CheckBox selected;
 
         public SongContentViewHolder(View v){
             super(v);
             Sname = (TextView) v.findViewById(R.id.Song_name);
             Ssinger = (TextView) v.findViewById(R.id.Singer_name);
             Simage = (ImageView) v.findViewById(R.id.img);
-            itemView.setOnClickListener(new View.OnClickListener() {
+            addToPlaylist = (ImageButton) v.findViewById(R.id.add_btn);
+            selected = (CheckBox) v.findViewById(R.id.item_check);
+
+            v.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
+                public void onClick(View view) {
                     int pos = (int) v.getTag();
-                    HelperMusicPlayer.getInstance().reset();
-                    HelperMusicPlayer.index=pos;
-                    songClickListener.onItemClick(filteredSongs.get(pos));
+                    if (mode == SELECTABLE_MODE){
+                        selected.setChecked(!selected.isChecked()); // toggle
+                        selected.callOnClick();
+                    }
+                    else {
+                        HelperMusicPlayer.getInstance().reset();
+                        HelperMusicPlayer.index=pos;
+                        songClickListener.onItemClick(filteredSongs.get(pos));
+                    }
                 }
             });
+
+            addToPlaylist.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int pos = (int) v.getTag();
+                    songClickListener.onAddBtnClick(filteredSongs.get(pos));
+                }
+            });
+
+            v.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    int index = (int) v.getTag();
+                    selected.setChecked(true);
+                    selected.callOnClick();
+                    songClickListener.onLongItemClick(filteredSongs.get(index));
+                    return true;
+                }
+            });
+            selected.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    boolean checked = ((CheckBox) view).isChecked();
+                    int index = (int) v.getTag();
+                    if (checked){
+                        selectedItems.add(index);
+                    }
+                    else{
+                        selectedItems.remove(index);
+                    }
+                }
+            });
+
         }
     }
     //=====================================================================================
@@ -127,5 +184,36 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongContentVie
             filteredSongs = (ArrayList<Song>) filterResults.values;
             notifyDataSetChanged();
         }
+    }
+
+    public void setMode(int m){
+        mode = m;
+        if (mode == DEFAULT_MODE) {
+            selectedItems.clear();
+        }
+        notifyDataSetChanged();
+    }
+
+    public void removeSelectedItems(){
+        ArrayList<Song> removableItems = new ArrayList<>();
+        for (int i=0; i < selectedItems.size(); i++ ){
+            Integer item = selectedItems.get(i);
+            removableItems.add( filteredSongs.get(item) );
+        }
+
+        ArrayList<String> songIDs = new ArrayList<>();
+        for (int i = 0; i < selectedItems.size(); i++){
+            songIDs.add(filteredSongs.get(selectedItems.get(i)).getId());
+        }
+
+        for(Song product : removableItems){
+            filteredSongs.remove(product);
+            songs.remove(product);
+        }
+
+        songClickListener.deleteSelectedItems(songIDs);
+
+        selectedItems.clear();
+        notifyDataSetChanged();
     }
 }

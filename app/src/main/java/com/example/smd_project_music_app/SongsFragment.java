@@ -2,51 +2,54 @@ package com.example.smd_project_music_app;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Filterable;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 
-public class SongsFragment extends Fragment implements SongAdapter.onSongClick, PlaylistsFragment.PlaylistsFragmentListener {
+public class SongsFragment extends Fragment implements SongAdapter.onSongClick {
 
 		SongsFragmentListener listener;
 		private RecyclerView recyclerView;
-		private SongAdapter mAdapter;
+		private SongAdapter adapter;
 		private RecyclerView.LayoutManager layoutManager;
-
-		private static ContentResolver contentResolver1;
 
 		private Playlist playlist = new Playlist();
 		private ContentResolver contentResolver;
 		private EditText search;
 		Filterable filterable;
-		private TextView noOfSongs;
 
-		public static Fragment getInstance(int position, ContentResolver mcontentResolver) {
-				Bundle bundle = new Bundle();
-				bundle.putInt("pos", position);
-				SongsFragment tabFragment = new SongsFragment();
-				tabFragment.setArguments(bundle);
-				contentResolver1 = mcontentResolver;
-				return tabFragment;
-		}
+		private TextView noOfSongs;
+		private TextView allSongsLabel;
+		private Menu optionsMenu;
+
+		String playlistName;
+		private boolean defaultMode = true;
 
 		@Override
 		public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,6 +62,15 @@ public class SongsFragment extends Fragment implements SongAdapter.onSongClick, 
 				super.onAttach(context);
 				if (context instanceof SongsFragmentListener) {
 						listener = (SongsFragmentListener) context;
+				}
+		}
+
+		public void onResume() {
+				super.onResume();
+				Bundle arguments = getArguments();
+				if (arguments != null && arguments.size() > 0) {
+						changeDataset((Playlist) arguments.getSerializable("data"));
+						arguments.clear();
 				}
 		}
 
@@ -89,29 +101,44 @@ public class SongsFragment extends Fragment implements SongAdapter.onSongClick, 
 				layoutManager = new LinearLayoutManager(getActivity());
 				recyclerView.setLayoutManager(layoutManager);
 
-				SongAdapter adapter = new SongAdapter(playlist.getDataset(), this);
-				mAdapter = adapter;
+				adapter = new SongAdapter(playlist.getDataset(), this);
 				filterable = adapter;
 				recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
-				recyclerView.setAdapter(mAdapter);
+				recyclerView.setAdapter(adapter);
 
 				noOfSongs = (TextView) view.findViewById(R.id.no_of_songs);
-
+				allSongsLabel = (TextView) view.findViewById(R.id.all_songs_label);
 				return view;
 		}
 
 		@Override
 		public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-				contentResolver = contentResolver1;
+				contentResolver = getActivity().getContentResolver();
 				setContent();
-				noOfSongs.setText(Integer.toString(playlist.getDataset().size()));
+		}
+
+		public void onSaveInstanceState(Bundle state) {
+				super.onSaveInstanceState(state);
+				state.putSerializable("playlist",playlist);
+		}
+
+		@Override
+		public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+				super.onActivityCreated(savedInstanceState);
+				if (savedInstanceState != null) {
+						//Restore the fragment's state here
+						playlist = (Playlist) savedInstanceState.getSerializable("playlist");
+				}
 		}
 
 		/**
 		 * Setting the content in the listView and sending the data to the Activity
 		 */
 		public void setContent() {
+				playlist.getSongsList().clear();
+				playlist.getDataset().clear();
 				getMusic();
+				noOfSongs.setText(Integer.toString(playlist.getSongsList().size()));
 		}
 
 		public void getMusic() {
@@ -124,36 +151,107 @@ public class SongsFragment extends Fragment implements SongAdapter.onSongClick, 
 						int songDuration = songCursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
 
 						do {
-								if (songCursor.getString(songPath).contains("/storage/emulated/0/Songs")){
+								if (songCursor.getString(songPath).contains("/storage/emulated/0/Songs")) {
 										playlist.addSong(new Song(songCursor.getString(songTitle),
 														songCursor.getString(songArtist), songCursor.getString(songPath),
 														songCursor.getInt(songDuration)));
 								}
 						}
 						while (songCursor.moveToNext());
-						mAdapter.notifyDataSetChanged();
+						adapter.notifyDataSetChanged();
 						songCursor.close();
 				}
 		}
 
-		@Override
-		public void onItemClick(Song song) {
-				playlist.addSong(song);
-				listener.onSongSelected(song);
-		}
-
-		@Override
-		public void onPlaylistSelected(Playlist playlist) {
+		public void changeDataset(Playlist playlist) {
 				this.playlist.getDataset().clear();
 				this.playlist.getSongsList().clear();
 
-				if (playlist != null){
+				if (playlist != null) {
 						this.playlist = playlist;
-						mAdapter.updateData(playlist.getDataset());
+						if (adapter == null) {
+								adapter = new SongAdapter(playlist.getDataset(), this);
+						}
+						adapter.updateData(playlist.getDataset());
+						if (noOfSongs == null)
+								noOfSongs = (TextView) getView().findViewById(R.id.no_of_songs);
+						noOfSongs.setText(Integer.toString(playlist.getSongsList().size()));
+						playlistName = playlist.getName();
+						allSongsLabel.setText(playlistName);
+						defaultMode = false;
 				}
 		}
 
-		public interface SongsFragmentListener{
-				public void onSongSelected(Song song);
+		// action mode
+		private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+
+				public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+
+						MenuInflater inflater = mode.getMenuInflater();
+						inflater.inflate(R.menu.main_action, menu);
+						return true;
+				}
+
+				public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+						return false;
+				}
+
+				public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+						switch (item.getItemId()) {
+								case R.id.delete:
+										adapter.removeSelectedItems();
+										mode.finish();
+										noOfSongs.setText(Integer.toString(playlist.getSongsList().size()));
+										return true;
+								default:
+										return false;
+						}
+				}
+
+				public void onDestroyActionMode(ActionMode mode) {
+						adapter.setMode(SongAdapter.DEFAULT_MODE);
+						defaultMode = true;
+				}
+		};
+
+		@Override
+		public void onItemClick(Song song) {
+				playlist.addSong(song);
+				listener.onSongSelected(this.playlist);
+		}
+
+		@Override
+		public void onLongItemClick(Song song) {
+				if (!defaultMode){
+						getActivity().startActionMode(actionModeCallback);
+						adapter.setMode(SongAdapter.SELECTABLE_MODE);
+				}
+		}
+
+		@Override
+		public void deleteSelectedItems(ArrayList<String> songIDs) {
+				listener.deleteSelectedItems(playlistName, songIDs);
+		}
+
+		@Override
+		public void onAddBtnClick(Song song) {
+				listener.onAddToPlaylistClicked(song);
+		}
+
+		public interface SongsFragmentListener {
+				public void onSongSelected(Playlist playlist);
+				public void onAddToPlaylistClicked(Song song);
+				public void deleteSelectedItems(String playlistName, ArrayList<String> songIDs);
+		}
+
+		public boolean onCreateOptionsMenu(Menu menu) {
+				MenuInflater inflater = getActivity().getMenuInflater();
+				inflater.inflate(R.menu.main, menu);
+				optionsMenu = menu;
+				return super.getActivity().onCreateOptionsMenu(menu);
+		}
+
+		public boolean onOptionsItemSelected(MenuItem item) {
+				return super.onOptionsItemSelected(item);
 		}
 }
