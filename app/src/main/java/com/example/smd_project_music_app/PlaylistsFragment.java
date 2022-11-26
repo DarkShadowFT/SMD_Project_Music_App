@@ -20,6 +20,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.concurrent.ConcurrentHashMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,7 +36,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
@@ -60,6 +61,8 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 
 		private TextView noOfPlaylists;
 		private ImageView newPlaylistBtn;
+
+		private File filesDir;
 
 //		private static PlaylistsFragment tabFragment;
 
@@ -233,14 +236,14 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 						String line;
 						BufferedReader reader = new BufferedReader(new FileReader(playlistFile));
 						line = reader.readLine();
-						if (line.equals("#EXTM3U")) {
+						if (line != null && line.equals("#EXTM3U")) {
 								line = reader.readLine();
 								playlist.setName(line);
 								String artist;
 								String title;
 								String path;
 								int duration;
-								while ((line = reader.readLine()) != null) {
+								while ((line = reader.readLine()) != null && !line.equals("#EXTM3U")) {
 										String components[] = line.split(" – ", 2);
 										if (components.length > 1) {
 												title = components[1];
@@ -264,8 +267,12 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 
 		public void exportToM3U(String playlistName, Playlist playlist) {
 				try {
-						File file = new File(getActivity().getFilesDir(), playlistName);
-						if (playlist.getSongsList().size() > 0 && file.exists())
+						if (getActivity() == null && filesDir == null)
+								return;
+						else if (filesDir == null && getActivity() != null)
+								filesDir = getActivity().getFilesDir();
+						File file = new File(filesDir, playlistName);
+						if (file.exists())
 								file.delete();
 						BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
 						writer.append("#EXTM3U");
@@ -337,21 +344,24 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 				}
 		}
 
-		public void deleteSongsFromPlaylist(String playlistName, ArrayList<String> songIDs){
-				for (int i = 0; i < playlists.size(); i++){
-						if (playlists.get(i) != null && playlists.get(i).getName().equals(playlistName)){
-								Playlist playlist = playlists.get(i);
-								for (int k = 0; k < songIDs.size(); k++){
-										for (Map.Entry<String, Song> entry: playlists.get(i).getSongsList().entrySet()){
-												if (entry.getValue().getId().equals(songIDs.get(k))){
-														playlist.removeSong(songIDs.get(k));
+		public void deleteSongsFromPlaylist(String playlistName, ArrayList<String> songPaths){
+				ArrayList<Playlist> tempPlaylists = playlists;
+				for (int i = 0; i < tempPlaylists.size(); i++){
+						if (tempPlaylists.get(i) != null && tempPlaylists.get(i).getName().equals(playlistName)){
+								Playlist playlist = tempPlaylists.get(i);
+								for (int k = 0; k < songPaths.size(); k++){
+										ConcurrentHashMap<String, Song> tempMap = tempPlaylists.get(i).getSongsList();
+										for (Map.Entry<String, Song> entry: tempMap.entrySet()){
+												if (entry.getValue().getPath().equals(songPaths.get(k))){
+														playlist.removeSong(entry.getValue().getId());
 												}
 										}
 								}
-								playlists.set(i, playlist);
+								tempPlaylists.set(i, playlist);
 								exportToM3U(playlist.getName(), playlist);
-								mAdapter.notifyDataSetChanged();
 						}
 				}
+				playlists = tempPlaylists;
+				mAdapter.notifyDataSetChanged();
 		}
 }

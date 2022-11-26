@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Playlist implements Serializable {
 		private String id;
@@ -14,13 +15,13 @@ public class Playlist implements Serializable {
 		private String path;
 
 		private ArrayList<Song> dataset;
-		private HashMap<String, Song> songsList;
+		private ConcurrentHashMap<String, Song> songsList;
 
 		private transient PlaylistFirebaseDAO dao = null;
 
 		Playlist(){
 				id = UUID.randomUUID().toString();
-				songsList = new HashMap<>();
+				songsList = new ConcurrentHashMap<>();
 				dataset = new ArrayList<>();
 				path = "";
 		}
@@ -28,12 +29,12 @@ public class Playlist implements Serializable {
 		Playlist(String name){
 				id = UUID.randomUUID().toString();
 				this.name = name;
-				this.songsList = new HashMap<>();
+				this.songsList = new ConcurrentHashMap<>();
 				dataset = new ArrayList<>();
 				this.path = "";
 		}
 
-		Playlist(String name, String path, HashMap<String, Song> songsList){
+		Playlist(String name, String path, ConcurrentHashMap<String, Song> songsList){
 				id = UUID.randomUUID().toString();
 				this.name = name;
 				this.songsList = songsList;
@@ -60,11 +61,11 @@ public class Playlist implements Serializable {
 				this.name = name;
 		}
 
-		public HashMap<String, Song> getSongsList() {
+		public ConcurrentHashMap<String, Song> getSongsList() {
 				return songsList;
 		}
 
-		public void setSongsList(HashMap<String, Song> songsList) {
+		public void setSongsList(ConcurrentHashMap<String, Song> songsList) {
 				this.songsList = songsList;
 		}
 

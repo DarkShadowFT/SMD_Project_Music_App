@@ -223,14 +223,17 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 
 		@Override
 		public void onAddToPlaylistClicked(Song song) {
-				tabLayout = (TabLayout) findViewById(R.id.tabs);
 				TabLayout.Tab tab = tabLayout.getTabAt(0);
 				tab.select();
 				playlistsFragment.addSongToPlaylist(song);
 		}
 
 		@Override
-		public void deleteSelectedItems(String playlistName, ArrayList<String> songIDs) {
-				playlistsFragment.deleteSongsFromPlaylist(playlistName, songIDs);
+		public void deleteSelectedItems(String playlistName, ArrayList<String> songPaths) {
+				TabLayout.Tab tab = tabLayout.getTabAt(0);
+				tab.select();
+				playlistsFragment.deleteSongsFromPlaylist(playlistName, songPaths);
+				tab = tabLayout.getTabAt(1);
+				tab.select();
 		}
 }

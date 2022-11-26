@@ -2,7 +2,6 @@ package com.example.smd_project_music_app;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,18 +18,17 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Filterable;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 
 public class SongsFragment extends Fragment implements SongAdapter.onSongClick {
 
@@ -229,8 +227,17 @@ public class SongsFragment extends Fragment implements SongAdapter.onSongClick {
 		}
 
 		@Override
-		public void deleteSelectedItems(ArrayList<String> songIDs) {
-				listener.deleteSelectedItems(playlistName, songIDs);
+		public void deleteSelectedItems(ArrayList<String> songPaths) {
+				for (int i = 0; i < songPaths.size(); i++){
+						Iterator<Map.Entry<String, Song>> iter = playlist.getSongsList().entrySet().iterator();
+						while (iter.hasNext()) {
+								Map.Entry<String, Song> newMap = (Map.Entry<String, Song>) iter.next();
+								if (newMap.getValue().getPath().equals(songPaths.get(i))){
+										playlist.removeSong(newMap.getValue().getId());
+								}
+						}
+				}
+				listener.deleteSelectedItems(playlistName, songPaths);
 		}
 
 		@Override

@@ -54,7 +54,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
 				NextSong=findViewById(R.id.next);
 				PreviousSong=findViewById(R.id.prev);
 				PlayBtn=findViewById(R.id.Play);
-
+				handler = new Handler();
 
 				Intent intent = getIntent();
 				MySongsDataset = ((Playlist) intent.getSerializableExtra("MySongs")).getDataset();

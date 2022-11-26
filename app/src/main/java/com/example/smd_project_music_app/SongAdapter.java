@@ -49,6 +49,13 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongContentVie
         holder.Ssinger.setText(SongSinger);
 //        holder.Simage.setImageResource(SongImg);
         holder.itemView.setTag(position);
+        if (mode == DEFAULT_MODE){
+            holder.selected.setChecked(false);
+            holder.selected.setVisibility(View.INVISIBLE);
+        }
+        else{
+            holder.selected.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -203,7 +210,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongContentVie
 
         ArrayList<String> songIDs = new ArrayList<>();
         for (int i = 0; i < selectedItems.size(); i++){
-            songIDs.add(filteredSongs.get(selectedItems.get(i)).getId());
+            songIDs.add(filteredSongs.get(selectedItems.get(i)).getPath());
         }
 
         for(Song product : removableItems){
