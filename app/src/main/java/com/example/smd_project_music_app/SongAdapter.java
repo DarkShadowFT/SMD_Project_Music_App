@@ -14,24 +14,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class SongAdapter extends RecyclerView.Adapter<SongAdapter.PlaylistContentViewHolder> implements Filterable {
+public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongContentViewHolder> implements Filterable {
     private ArrayList<Song> songs;
     private ArrayList<Song> filteredSongs;
     private Filter filter;
 
-    private OnMusicClick SongClickListener;
+    private onSongClick songClickListener;
 
     @Override
-    public PlaylistContentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public SongContentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.all_songs_item, parent, false);
+                .inflate(R.layout.songs_list_item, parent, false);
 
-        PlaylistContentViewHolder vh = new PlaylistContentViewHolder(v);
+        SongContentViewHolder vh = new SongContentViewHolder(v);
         return vh;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull PlaylistContentViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull SongContentViewHolder holder, int position) {
         String SongName = filteredSongs.get(position).getTitle();
         int SongImg = filteredSongs.get(position).getImg();
         String SongSinger = filteredSongs.get(position).getArtist();
@@ -46,25 +46,31 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.PlaylistConten
         return filteredSongs.size();
     }
 
-    public SongAdapter(ArrayList<Song> ds, OnMusicClick ClickListener){
+    public SongAdapter(ArrayList<Song> ds, onSongClick ClickListener){
         songs = ds;
         filteredSongs = ds;
-        this.SongClickListener=ClickListener;
+        this.songClickListener =ClickListener;
     }
 
-    public interface OnMusicClick {
+    public void updateData(ArrayList<Song> ds){
+        songs = ds;
+        filteredSongs = songs;
+        notifyDataSetChanged();
+    }
+
+    public interface onSongClick {
         //void onItemClick(int position);
         public void onItemClick(Song song);
     }
 
     //=====================================================================================
-    public class PlaylistContentViewHolder extends RecyclerView.ViewHolder{
+    public class SongContentViewHolder extends RecyclerView.ViewHolder{
 
         public TextView Sname;
         public TextView Ssinger;
         public ImageView Simage;
 
-        public PlaylistContentViewHolder(View v){
+        public SongContentViewHolder(View v){
             super(v);
             Sname = (TextView) v.findViewById(R.id.Song_name);
             Ssinger = (TextView) v.findViewById(R.id.Singer_name);
@@ -75,7 +81,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.PlaylistConten
                     int pos = (int) v.getTag();
                     HelperMusicPlayer.getInstance().reset();
                     HelperMusicPlayer.index=pos;
-                    SongClickListener.onItemClick(filteredSongs.get(pos));
+                    songClickListener.onItemClick(filteredSongs.get(pos));
                 }
             });
         }
@@ -84,12 +90,12 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.PlaylistConten
     @Override
     public Filter getFilter() {
         if (filter == null){
-            filter = new ProductFilter();
+            filter = new SongsFilter();
         }
         return filter;
     }
 
-    private class ProductFilter extends Filter {
+    private class SongsFilter extends Filter {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults filterResults = new FilterResults();

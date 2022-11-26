@@ -22,10 +22,9 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 
-public class SongsFragment extends Fragment implements SongAdapter.OnMusicClick {
+public class SongsFragment extends Fragment implements SongAdapter.onSongClick, PlaylistsFragment.PlaylistsFragmentListener {
 
 		SongsFragmentListener listener;
 		private RecyclerView recyclerView;
@@ -34,8 +33,7 @@ public class SongsFragment extends Fragment implements SongAdapter.OnMusicClick 
 
 		private static ContentResolver contentResolver1;
 
-		public ArrayList<Song> songsList = new ArrayList<>();
-		private Hashtable<String, Song> index = new Hashtable<String, Song>();
+		private Playlist playlist = new Playlist();
 		private ContentResolver contentResolver;
 		private EditText search;
 		Filterable filterable;
@@ -91,7 +89,7 @@ public class SongsFragment extends Fragment implements SongAdapter.OnMusicClick 
 				layoutManager = new LinearLayoutManager(getActivity());
 				recyclerView.setLayoutManager(layoutManager);
 
-				SongAdapter adapter = new SongAdapter(songsList, this);
+				SongAdapter adapter = new SongAdapter(playlist.getDataset(), this);
 				mAdapter = adapter;
 				filterable = adapter;
 				recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
@@ -106,7 +104,7 @@ public class SongsFragment extends Fragment implements SongAdapter.OnMusicClick 
 		public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 				contentResolver = contentResolver1;
 				setContent();
-				noOfSongs.setText(Integer.toString(songsList.size()));
+				noOfSongs.setText(Integer.toString(playlist.getDataset().size()));
 		}
 
 		/**
@@ -127,7 +125,7 @@ public class SongsFragment extends Fragment implements SongAdapter.OnMusicClick 
 
 						do {
 								if (songCursor.getString(songPath).contains("/storage/emulated/0/Songs")){
-										songsList.add(new Song(songCursor.getString(songTitle),
+										playlist.addSong(new Song(songCursor.getString(songTitle),
 														songCursor.getString(songArtist), songCursor.getString(songPath),
 														songCursor.getInt(songDuration)));
 								}
@@ -140,30 +138,20 @@ public class SongsFragment extends Fragment implements SongAdapter.OnMusicClick 
 
 		@Override
 		public void onItemClick(Song song) {
-				index.put(song.getId(), song);
+				playlist.addSong(song);
 				listener.onSongSelected(song);
 		}
 
-//		private void showDialog(final int position) {
-//				AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-//				builder.setMessage(getString(R.string.play_next))
-//								.setCancelable(true)
-//								.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-//										@Override
-//										public void onClick(DialogInterface dialog, int which) {
-//
-//										}
-//								})
-//								.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-//										@Override
-//										public void onClick(DialogInterface dialog, int which) {
-//												createDataParse.currentSong(songsList.get(position));
-//												setContent();
-//										}
-//								});
-//				AlertDialog alertDialog = builder.create();
-//				alertDialog.show();
-//		}
+		@Override
+		public void onPlaylistSelected(Playlist playlist) {
+				this.playlist.getDataset().clear();
+				this.playlist.getSongsList().clear();
+
+				if (playlist != null){
+						this.playlist = playlist;
+						mAdapter.updateData(playlist.getDataset());
+				}
+		}
 
 		public interface SongsFragmentListener{
 				public void onSongSelected(Song song);

@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
     <TextView
-        android:id="@+id/Song_name"
+        android:id="@+id/playlist_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="50dp"
@@ -36,7 +36,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
     <TextView
-        android:id="@+id/no_of_songs"
+        android:id="@+id/no_of_playlists"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="10"
