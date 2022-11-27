@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -15,6 +16,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -25,13 +27,13 @@ import com.example.smd_project_music_app.Fragment.PlaylistsFragment;
 import com.example.smd_project_music_app.R;
 import com.example.smd_project_music_app.Model.Song;
 import com.example.smd_project_music_app.Fragment.SongsFragment;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements PlaylistsFragment.PlaylistsFragmentListener, SongsFragment.SongsFragmentListener {
 
-//		private ViewPager viewPager;
 		private TabLayout tabLayout;
 		private FrameLayout frameLayout;
 		Fragment fragment;
@@ -41,20 +43,18 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 		private PlaylistsFragment playlistsFragment;
 		private Fragment songsFragment;
 
-//		ViewPagerAdapter viewPagerAdapter;
-
-		private final int MY_PERMISSION_REQUEST = 100;
+		private final int MY_PERMISSION_REQUEST = 200;
 		boolean openPlaylist = false;
 		Playlist playlist = new Playlist();
 
 		/////
 		ActivityResultLauncher<Intent> MusicPlayerLauncher;
 
+		@RequiresApi(api = Build.VERSION_CODES.R)
 		@Override
 		protected void onCreate(Bundle savedInstanceState) {
 				super.onCreate(savedInstanceState);
 				setContentView(R.layout.activity_main);
-//				viewPager = findViewById(R.id.view_pager);
 				tabLayout = findViewById(R.id.tabs);
 				frameLayout = findViewById(R.id.fragment);
 
@@ -62,13 +62,6 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 				songsFragment = new SongsFragment();
 
 				grantedPermission();
-//				tabLayout.setupWithViewPager(viewPager);
-
-//				viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), getContentResolver());
-//				viewPagerAdapter.addFragment(playlistsFragment, "Playlists");
-//				viewPagerAdapter.addFragment(songsFragment, "Songs");
-//				viewPager.setAdapter(viewPagerAdapter);
-
 
 				fragmentManager = getSupportFragmentManager();
 				fragmentTransaction = fragmentManager.beginTransaction();
@@ -80,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 				tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 							 @Override
 							 public void onTabSelected(TabLayout.Tab tab) {
-									 // Fragment fragment = null;
 									 switch (tab.getPosition()) {
 											 case 0:
 													 fragment = playlistsFragment;
@@ -114,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 
 			 	});
 
-				/**launcher**/
 				MusicPlayerLauncher=registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
 						@Override
 						public void onActivityResult(ActivityResult result) {
@@ -146,18 +137,19 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 		 * Function to ask user to grant the permission.
 		 */
 
+		@RequiresApi(api = Build.VERSION_CODES.R)
 		private void grantedPermission() {
 				if (ContextCompat.checkSelfPermission(MainActivity.this,
-								Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+								Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 						ActivityCompat.requestPermissions(MainActivity.this,
-										new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_PERMISSION_REQUEST);
+										new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, MY_PERMISSION_REQUEST);
 						if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-										Manifest.permission.READ_EXTERNAL_STORAGE)) {
+										Manifest.permission.MANAGE_EXTERNAL_STORAGE)) {
 								ActivityCompat.requestPermissions(MainActivity.this,
-												new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_PERMISSION_REQUEST);
+												new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, MY_PERMISSION_REQUEST);
 						} else {
 								if (ContextCompat.checkSelfPermission(MainActivity.this,
-												Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+												Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 //										Snackbar snackbar = Snackbar.make(mDrawerLayout, "Provide the Storage Permission", Snackbar.LENGTH_LONG);
 //										snackbar.show();
 								}
@@ -170,9 +162,6 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 		/**
 		 * Checking if the permission is granted or not
 		 *
-		 * @param requestCode
-		 * @param permissions
-		 * @param grantResults
 		 */
 		@Override
 		public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -181,12 +170,12 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 						case MY_PERMISSION_REQUEST:
 								if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 										if (ContextCompat.checkSelfPermission(MainActivity.this,
-														Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+														Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 												Toast.makeText(this, "Permission Granted!", Toast.LENGTH_SHORT).show();
 //												setPagerLayout();
 										} else {
-//												Snackbar snackbar = Snackbar.make(mDrawerLayout, "Provide the Storage Permission", Snackbar.LENGTH_LONG);
-//												snackbar.show();
+												Snackbar snackbar = Snackbar.make(frameLayout, "Provide the Storage Permission", Snackbar.LENGTH_LONG);
+												snackbar.show();
 												finish();
 										}
 								}
@@ -195,30 +184,17 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 
 		@Override
 		public void onPlaylistSelected(Playlist playlist) {
-//				viewPagerAdapter.removeFragment(songsFragment, "Songs");
-//				viewPagerAdapter.notifyChangeInPosition(1);
-//				viewPagerAdapter.addFragment(songsFragment, "Songs");
-//				viewPager.setCurrentItem(1);
-//				FragmentManager fm = getSupportFragmentManager();
-//				FragmentTransaction ft = fm.beginTransaction();
-//				Bundle arguments = new Bundle();
-//				arguments.putSerializable("data",playlist);
-//				songsFragment.setArguments(arguments);
-//				ft.replace(R.id.fragment, songsFragment);
-//				ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//				ft.commitNow();
 				openPlaylist = true;
 				this.playlist = playlist;
 				tabLayout = (TabLayout) findViewById(R.id.tabs);
 				TabLayout.Tab tab = tabLayout.getTabAt(1);
+				assert tab != null;
 				tab.select();
-//				songsFragment.changeDataset(playlist);
 		}
 
 		@Override
 		public void onSongSelected(Playlist playlist) {
 				Intent intent = new Intent(this , MusicPlayerActivity.class);
-
 				intent.putExtra("MySongs", playlist);
 
 				//set flag or it will give error
@@ -230,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 		@Override
 		public void onAddToPlaylistClicked(Song song) {
 				TabLayout.Tab tab = tabLayout.getTabAt(0);
+				assert tab != null;
 				tab.select();
 				playlistsFragment.addSongToPlaylist(song);
 		}
@@ -237,9 +214,11 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 		@Override
 		public void deleteSelectedItems(String playlistName, ArrayList<String> songPaths) {
 				TabLayout.Tab tab = tabLayout.getTabAt(0);
+				assert tab != null;
 				tab.select();
 				playlistsFragment.deleteSongsFromPlaylist(playlistName, songPaths);
 				tab = tabLayout.getTabAt(1);
+				assert tab != null;
 				tab.select();
 		}
 

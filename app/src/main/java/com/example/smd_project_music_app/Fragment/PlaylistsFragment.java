@@ -164,8 +164,8 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 																				index.put(playlist.getId(), playlist);
 																				if (index.size() > hashmapSize){
 																						playlist.setDao(dao);
-																						playlist.save();
 																						exportToM3U(newPlaylistName, playlist);
+																						playlist.save();
 																						playlists.add(playlist);
 																						playlistNames.add(newPlaylistName);
 																						setContent();
@@ -196,6 +196,10 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 //				for (int i = 0; i < playlists.size(); i++){
 //						exportToM3U(playlists.get(i).getName(), playlists.get(i));
 //				}
+				filesDir = new File("/storage/emulated/0/Songs/Playlist/");
+				if (!filesDir.exists()){
+						filesDir.mkdirs();
+				}
 
 				return view;
 		}
@@ -232,7 +236,7 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 		}
 
 		public Playlist importPlaylist(String playlistName) {
-				File playlistFile = new File(getActivity().getFilesDir(), playlistName);
+				File playlistFile = new File(filesDir, playlistName + ".m3u");
 				Playlist playlist = new Playlist();
 				try {
 						String line;
@@ -271,11 +275,11 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 				try {
 						if (getActivity() == null && filesDir == null)
 								return;
-						else if (filesDir == null && getActivity() != null)
-								filesDir = getActivity().getFilesDir();
-						File file = new File(filesDir, playlistName);
+						File file = new File(filesDir, playlistName + ".m3u");
 						if (file.exists())
 								file.delete();
+						else if (!file.exists())
+								file.createNewFile();
 						BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
 						writer.append("#EXTM3U");
 						writer.newLine();
