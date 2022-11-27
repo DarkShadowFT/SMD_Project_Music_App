@@ -1,4 +1,4 @@
-package com.example.smd_project_music_app;
+package com.example.smd_project_music_app.Activity;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -19,6 +19,11 @@ import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.example.smd_project_music_app.Model.Playlist;
+import com.example.smd_project_music_app.Fragment.PlaylistsFragment;
+import com.example.smd_project_music_app.R;
+import com.example.smd_project_music_app.Model.Song;
+import com.example.smd_project_music_app.Fragment.SongsFragment;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;

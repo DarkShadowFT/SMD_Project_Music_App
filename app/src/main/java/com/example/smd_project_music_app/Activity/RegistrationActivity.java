@@ -1,4 +1,4 @@
-package com.example.smd_project_music_app;
+package com.example.smd_project_music_app.Activity;
 
 import android.os.Bundle;
 import android.content.Intent;
@@ -7,12 +7,12 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.smd_project_music_app.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.AuthResult;
 import com.google.android.gms.tasks.OnCompleteListener;

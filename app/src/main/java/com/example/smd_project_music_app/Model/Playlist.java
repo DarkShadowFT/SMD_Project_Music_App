@@ -1,9 +1,9 @@
-package com.example.smd_project_music_app;
+package com.example.smd_project_music_app.Model;
+
+import com.example.smd_project_music_app.DB.PlaylistFirebaseDAO;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.UUID;
@@ -19,7 +19,7 @@ public class Playlist implements Serializable {
 
 		private transient PlaylistFirebaseDAO dao = null;
 
-		Playlist(){
+		public Playlist(){
 				id = UUID.randomUUID().toString();
 				songsList = new ConcurrentHashMap<>();
 				dataset = new ArrayList<>();

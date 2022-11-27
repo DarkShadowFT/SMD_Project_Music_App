@@ -1,4 +1,4 @@
-package com.example.smd_project_music_app;
+package com.example.smd_project_music_app.Fragment;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -25,6 +25,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.smd_project_music_app.Model.Playlist;
+import com.example.smd_project_music_app.R;
+import com.example.smd_project_music_app.Model.Song;
+import com.example.smd_project_music_app.Adapter.SongAdapter;
 
 import java.util.ArrayList;
 import java.util.Iterator;

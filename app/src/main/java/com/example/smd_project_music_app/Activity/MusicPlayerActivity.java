@@ -1,4 +1,4 @@
-package com.example.smd_project_music_app;
+package com.example.smd_project_music_app.Activity;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -11,6 +11,11 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.smd_project_music_app.HelperMusicPlayer;
+import com.example.smd_project_music_app.Model.Playlist;
+import com.example.smd_project_music_app.R;
+import com.example.smd_project_music_app.Model.Song;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,7 +41,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
 		Runnable runnable;
 		Handler handler;
 
-		MediaPlayer MyMediaPlayer=HelperMusicPlayer.getInstance();
+		MediaPlayer MyMediaPlayer= HelperMusicPlayer.getInstance();
 
 		@Override
 		protected void onCreate(@Nullable Bundle savedInstanceState) {

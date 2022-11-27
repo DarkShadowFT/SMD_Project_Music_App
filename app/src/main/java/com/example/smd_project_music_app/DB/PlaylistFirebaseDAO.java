@@ -1,4 +1,4 @@
-package com.example.smd_project_music_app;
+package com.example.smd_project_music_app.DB;
 
 import android.util.Log;
 

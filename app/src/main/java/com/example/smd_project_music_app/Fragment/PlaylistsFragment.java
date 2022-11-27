@@ -1,13 +1,10 @@
-package com.example.smd_project_music_app;
+package com.example.smd_project_music_app.Fragment;
 
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -16,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Filterable;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,13 +26,19 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.smd_project_music_app.DB.PlaylistFirebaseDAO;
+import com.example.smd_project_music_app.Model.Playlist;
+import com.example.smd_project_music_app.Adapter.PlaylistAdapter;
+import com.example.smd_project_music_app.PlaylistViewModel;
+import com.example.smd_project_music_app.R;
+import com.example.smd_project_music_app.Model.Song;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;

@@ -4,6 +4,9 @@ import android.os.Bundle;
 
 import androidx.lifecycle.ViewModel;
 
+import com.example.smd_project_music_app.DB.PlaylistFirebaseDAO;
+import com.example.smd_project_music_app.Model.Playlist;
+
 import java.util.ArrayList;
 
 public class PlaylistViewModel extends ViewModel {
