@@ -26,7 +26,7 @@ public class Playlist implements Serializable {
 				path = "";
 		}
 
-		Playlist(String name){
+		public Playlist(String name){
 				id = UUID.randomUUID().toString();
 				this.name = name;
 				this.songsList = new ConcurrentHashMap<>();

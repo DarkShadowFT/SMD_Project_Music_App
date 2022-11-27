@@ -32,14 +32,13 @@ public class MusicPlayerActivity extends AppCompatActivity {
 		ImageView NextSong;
 		ImageView PreviousSong;
 		ImageView PlayBtn;
-		ImageView PauseBtn;
 
 		ArrayList<Song> MySongsDataset;
 		int currSong;
 		Song MyCurrSong;
 
-		Runnable runnable;
 		Handler handler;
+		Runnable runnable;
 
 		MediaPlayer MyMediaPlayer= HelperMusicPlayer.getInstance();
 
@@ -55,6 +54,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
 				Singer=findViewById(R.id.SingerName);
 				TotalTime=findViewById(R.id.total_time);
 				ElapsedTime=findViewById(R.id.curr_time);
+				Avatar.setImageResource(R.drawable.song_artist);
 
 				NextSong=findViewById(R.id.next);
 				PreviousSong=findViewById(R.id.prev);
@@ -111,14 +111,6 @@ public class MusicPlayerActivity extends AppCompatActivity {
 						MyMediaPlayer.setDataSource(MyCurrSong.getPath());
 						MyMediaPlayer.prepare();
 						setControls();
-						MyMediaPlayer.start();
-//						ProgressBar.setProgress(0);
-						long milliseconds = MyMediaPlayer.getDuration();
-//
-//						ProgressBar.setMax((int) milliseconds);
-						TotalTime.setText(getFormattedTime(milliseconds));
-//						ElapsedTime.setText(getFormattedTime(MyMediaPlayer.getCurrentPosition()));
-						playCycle();
 				} catch (IOException e) {
 						e.printStackTrace();
 				}
@@ -135,8 +127,8 @@ public class MusicPlayerActivity extends AppCompatActivity {
 				{
 						MyMediaPlayer.start();
 						PlayBtn.setImageResource(R.drawable.ic_baseline_pause_circle_24);
+						playCycle();
 				}
-
 		}
 		private void PlayNextSong()
 		{
@@ -171,19 +163,18 @@ public class MusicPlayerActivity extends AppCompatActivity {
 				SongName.setText(MyCurrSong.getTitle());
 				Singer.setText(MyCurrSong.getArtist());
 				PlayMusic();
-
 		}
 
 		public String getFormattedTime(long milliseconds){
-				// formula for conversion for
-				// milliseconds to minutes.
+				// formula for conversion of milliseconds to minutes.
 				long minutes = (milliseconds / 1000) / 60;
 
-				// formula for conversion for
-				// milliseconds to seconds
+				// formula for conversion of milliseconds to seconds
 				long seconds = (milliseconds / 1000) % 60;
-
-				return minutes + ":" + seconds;
+				if (seconds < 10)
+						return minutes + ":" + "0" + seconds;
+				else
+						return minutes + ":" + seconds;
 		}
 
 		/**
@@ -191,16 +182,17 @@ public class MusicPlayerActivity extends AppCompatActivity {
 		 */
 
 		private void setControls() {
-				ProgressBar.setMax(MyMediaPlayer.getDuration());
+				long milliseconds = MyMediaPlayer.getDuration();
+				ProgressBar.setMax((int) milliseconds);
+				TotalTime.setText(getFormattedTime(milliseconds));
 				MyMediaPlayer.start();
 				playCycle();
-				ElapsedTime.setText(getFormattedTime(MyMediaPlayer.getDuration()));
-				if (MyMediaPlayer.isPlaying()) {
-						PauseMusic();
-				}
-				else {
-					PlayMusic();
-				}
+//				if (MyMediaPlayer.isPlaying()) {
+//						PauseMusic();
+//				}
+//				else {
+//						PlayMusic();
+//				}
 
 				ProgressBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 						@Override
@@ -223,4 +215,8 @@ public class MusicPlayerActivity extends AppCompatActivity {
 				});
 		}
 
+		@Override
+		protected void onDestroy() {
+				super.onDestroy();
+		}
 }

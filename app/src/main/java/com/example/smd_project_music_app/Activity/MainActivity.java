@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.example.smd_project_music_app.HelperMusicPlayer;
 import com.example.smd_project_music_app.Model.Playlist;
 import com.example.smd_project_music_app.Fragment.PlaylistsFragment;
 import com.example.smd_project_music_app.R;
@@ -240,5 +241,11 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 				playlistsFragment.deleteSongsFromPlaylist(playlistName, songPaths);
 				tab = tabLayout.getTabAt(1);
 				tab.select();
+		}
+
+		@Override
+		protected void onDestroy() {
+				super.onDestroy();
+				HelperMusicPlayer.getInstance().release();
 		}
 }
