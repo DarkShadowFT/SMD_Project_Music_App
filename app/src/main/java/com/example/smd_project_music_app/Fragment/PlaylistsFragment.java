@@ -231,6 +231,7 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 				Playlist playlist;
 				for (int i = 0; i < playlistNames.size(); i++) {
 						playlist = importPlaylist(playlistNames.get(i));
+						playlist.setName(playlistNames.get(i));
 						playlists.add(playlist);
 				}
 		}
@@ -243,8 +244,6 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 						BufferedReader reader = new BufferedReader(new FileReader(playlistFile));
 						line = reader.readLine();
 						if (line != null && line.equals("#EXTM3U")) {
-								line = reader.readLine();
-								playlist.setName(line);
 								String artist;
 								String title;
 								String path;
@@ -282,8 +281,6 @@ public class PlaylistsFragment extends Fragment implements PlaylistAdapter.onPla
 								file.createNewFile();
 						BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
 						writer.append("#EXTM3U");
-						writer.newLine();
-						writer.append(playlist.getName());
 						writer.newLine();
 						String output;
 						for (int i = 0; i < playlist.getSongsList().size(); i++) {
