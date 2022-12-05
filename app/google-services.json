@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "1098006765247",
+    "firebase_url": "https://smd-project-music-app-default-rtdb.firebaseio.com",
     "project_id": "smd-project-music-app",
     "storage_bucket": "smd-project-music-app.appspot.com"
   },

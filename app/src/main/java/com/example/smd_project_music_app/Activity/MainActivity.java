@@ -29,6 +29,7 @@ import com.example.smd_project_music_app.Model.Song;
 import com.example.smd_project_music_app.Fragment.SongsFragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 
 		/////
 		ActivityResultLauncher<Intent> MusicPlayerLauncher;
+		private FirebaseAnalytics mFirebaseAnalytics;
+
 
 		@RequiresApi(api = Build.VERSION_CODES.R)
 		@Override
@@ -120,6 +123,8 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 				if (savedInstanceState != null){
 						songsFragment = getSupportFragmentManager().getFragment(savedInstanceState, "songs");
 				}
+
+				mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
 		}
 
