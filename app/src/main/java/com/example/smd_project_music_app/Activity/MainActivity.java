@@ -14,19 +14,26 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.example.smd_project_music_app.CreateNotification;
 import com.example.smd_project_music_app.HelperMusicPlayer;
 import com.example.smd_project_music_app.Model.Playlist;
 import com.example.smd_project_music_app.Fragment.PlaylistsFragment;
 import com.example.smd_project_music_app.R;
 import com.example.smd_project_music_app.Model.Song;
 import com.example.smd_project_music_app.Fragment.SongsFragment;
+import com.example.smd_project_music_app.Services.OnClearFromRecentService;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -125,8 +132,8 @@ public class MainActivity extends AppCompatActivity implements PlaylistsFragment
 				}
 
 				mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
 		}
+
 
 		@Override
 		protected void onSaveInstanceState(@NonNull Bundle outState) {

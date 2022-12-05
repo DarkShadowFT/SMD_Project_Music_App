@@ -1,7 +1,13 @@
 package com.example.smd_project_music_app.Activity;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -12,10 +18,12 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.smd_project_music_app.CreateNotification;
 import com.example.smd_project_music_app.HelperMusicPlayer;
 import com.example.smd_project_music_app.Model.Playlist;
 import com.example.smd_project_music_app.R;
 import com.example.smd_project_music_app.Model.Song;
+import com.example.smd_project_music_app.Services.OnClearFromRecentService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,6 +49,9 @@ public class MusicPlayerActivity extends AppCompatActivity {
 		Runnable runnable;
 
 		MediaPlayer MyMediaPlayer= HelperMusicPlayer.getInstance();
+
+		NotificationManager notificationManager;
+
 
 		@Override
 		protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,6 +94,43 @@ public class MusicPlayerActivity extends AppCompatActivity {
 						public void onClick(View v) { PlayPrevSong();
 						}
 				});
+
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+						createChannel();
+						registerReceiver(broadcastReceiver, new IntentFilter("TRACKS_TRACKS"));
+						startService(new Intent(getBaseContext(), OnClearFromRecentService.class));
+				}
+		}
+
+		BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+				@Override
+				public void onReceive(Context context, Intent intent) {
+						String action = intent.getExtras().getString("actionname");
+
+						switch (action){
+								case CreateNotification.ACTION_PREVIUOS:
+										PlayPrevSong();
+										break;
+								case CreateNotification.ACTION_PLAY:
+										PauseMusic();
+										break;
+								case CreateNotification.ACTION_NEXT:
+										PlayNextSong();
+										break;
+						}
+				}
+		};
+
+		private void createChannel() {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+						NotificationChannel channel = new NotificationChannel(CreateNotification.CHANNEL_ID,
+										"smd_project", NotificationManager.IMPORTANCE_LOW);
+
+						notificationManager = getSystemService(NotificationManager.class);
+						if (notificationManager != null){
+								notificationManager.createNotificationChannel(channel);
+						}
+				}
 		}
 
 		private void playCycle() {
@@ -105,6 +153,8 @@ public class MusicPlayerActivity extends AppCompatActivity {
 
 		private void PlayMusic()
 		{
+				CreateNotification.createNotification(MusicPlayerActivity.this, MyCurrSong,
+								R.drawable.ic_baseline_pause_circle_24, currSong, MySongsDataset.size()-1);
 				PlayBtn.setImageResource(R.drawable.ic_baseline_pause_circle_24);
 				MyMediaPlayer.reset();
 				try {
@@ -120,11 +170,15 @@ public class MusicPlayerActivity extends AppCompatActivity {
 		{
 				if(MyMediaPlayer.isPlaying())
 				{
+						CreateNotification.createNotification(MusicPlayerActivity.this, MyCurrSong,
+										R.drawable.ic_baseline_play_circle_24, currSong, MySongsDataset.size()-1);
 						MyMediaPlayer.pause();
 						PlayBtn.setImageResource(R.drawable.ic_baseline_play_circle_24);
 				}
 				else
 				{
+						CreateNotification.createNotification(MusicPlayerActivity.this, MyCurrSong,
+										R.drawable.ic_baseline_pause_circle_24, currSong, MySongsDataset.size()-1);
 						MyMediaPlayer.start();
 						PlayBtn.setImageResource(R.drawable.ic_baseline_pause_circle_24);
 						playCycle();
@@ -132,6 +186,8 @@ public class MusicPlayerActivity extends AppCompatActivity {
 		}
 		private void PlayNextSong()
 		{
+				CreateNotification.createNotification(MusicPlayerActivity.this, MyCurrSong,
+								R.drawable.ic_baseline_pause_circle_24, currSong, MySongsDataset.size()-1);
 				if(HelperMusicPlayer.index<MySongsDataset.size()-1) {
 						HelperMusicPlayer.index++;
 						SetASong();
@@ -145,6 +201,8 @@ public class MusicPlayerActivity extends AppCompatActivity {
 		}
 		private void PlayPrevSong()
 		{
+				CreateNotification.createNotification(MusicPlayerActivity.this, MyCurrSong,
+								R.drawable.ic_baseline_pause_circle_24, currSong, MySongsDataset.size()-1);
 				if(HelperMusicPlayer.index>0) {
 						HelperMusicPlayer.index--;
 						SetASong();
@@ -187,12 +245,6 @@ public class MusicPlayerActivity extends AppCompatActivity {
 				TotalTime.setText(getFormattedTime(milliseconds));
 				MyMediaPlayer.start();
 				playCycle();
-//				if (MyMediaPlayer.isPlaying()) {
-//						PauseMusic();
-//				}
-//				else {
-//						PlayMusic();
-//				}
 
 				ProgressBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 						@Override
@@ -218,5 +270,10 @@ public class MusicPlayerActivity extends AppCompatActivity {
 		@Override
 		protected void onDestroy() {
 				super.onDestroy();
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+						notificationManager.cancelAll();
+				}
+
+				unregisterReceiver(broadcastReceiver);
 		}
 }
