@@ -218,8 +218,16 @@ public class MusicPlayerActivity extends AppCompatActivity {
 				currSong=HelperMusicPlayer.index;
 				//set curr song
 				MyCurrSong=MySongsDataset.get(currSong);
-				SongName.setText(MyCurrSong.getTitle());
-				Singer.setText(MyCurrSong.getArtist());
+				String text = MyCurrSong.getTitle();
+				if (text.length() >= 23){
+						text = text.substring(0, 23) + "...";
+				}
+				SongName.setText(text);
+				text = MyCurrSong.getArtist();
+				if (text.length() >= 24){
+						text = text.substring(0, 23) + "...";
+				}
+				Singer.setText(text);
 				PlayMusic();
 		}
 
